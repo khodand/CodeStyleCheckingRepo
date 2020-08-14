@@ -1,154 +1,84 @@
+// Example program
 #include <iostream>
-#include <set>
 
 using namespace std;
 
-class MySet {
+int nodes_n = 0;
+int edges_n = 0;
+bool* checked = NULL;
 
-public:
-	MySet() = default;
+struct Edge {
+	int start = 0;
+	int end = 0;
+	Edge* next = NULL;
+};
 
-	void insert(int value) {
-		if (top == nullptr) {
-			top = new Node(value);
-			return;
-		}
+struct EdgeList {
+	Edge* head = NULL;
 
-		Node *nodeToInsert = top->findClosestNode(value);
+	void add(int a, int b) {
+		Edge* newElement = new Edge;
+		newElement->start = a;
+		newElement->end = b;
+		newElement->next = head;
 
-		if (value == nodeToInsert->value) {
-			return;
-		}
-
-		if (value > nodeToInsert->value) {
-			nodeToInsert->left = new Node(value);
-		}
-		else {
-			nodeToInsert->right = new Node(value);
-		}
-
+		head = newElement;
 	}
 
-	void erase(int value) {
-		if (value == top->value) {
-			Node *left = top->left;
-			Node *smallestLeftNode = left->smallestNode();
-			smallestLeftNode->right = top->right;
-
-			delete top;
-			top = left;
-			return;
+	void clear() {
+		while (head != NULL) {
+			Edge* tmp = head->next;
+			delete head;
+			head = tmp;
 		}
-
-		Node *ancestor = nullptr;
-		Node *current = top;
-		Node *next = top;
-		while (next != nullptr) {
-			ancestor = current;
-			current = next;
-			if (value == current->value) {
-				Node *leftToSave = current->left;
-				Node *rightToSave = current->right;
-
-				if (leftToSave == nullptr) {
-					leftToSave = rightToSave;
-					return;
-				}
-
-				Node *smallestNode = leftToSave->smallestNode();
-				smallestNode->right = rightToSave;
-
-				delete current;
-				if (value > ancestor->value) {
-					ancestor->left = leftToSave;
-				}
-				else {
-					ancestor->right = leftToSave;
-				}
-			}
-
-			next = value > current->value ? current->left : current->right;
-		}
-
 	}
 
-	bool exists(int value) {
-		Node *closestNode = top->findClosestNode(value);
-
-		return value == closestNode->value;
+	void isAvailable(int v, int &e_counter) {
+		checked[v] = true;
+		e_counter++;
+		cout << "E_counter " << e_counter << endl;
+		Edge* cur = head;
+		while (cur != NULL) {
+			if(cur->end == v && !checked[cur->start]) {
+				isAvailable(cur->start, e_counter);
+			}
+			cur = cur->next;
+		}
 	}
 
-	~MySet() {
-		top->clear();
-		delete top;
+	bool hasAvailable() {
+		for (int i = 0; i < nodes_n; ++i) {
+			int e_counter = 0;
+			for (int i = 0; i < nodes_n; ++i) {
+				checked[i] = false;
+			}
+			isAvailable(i, e_counter);
+			if (e_counter == nodes_n) {
+				return true;
+			}
+		}
+		return false;
 	}
-
-private:
-	struct Node {
-		int value;
-		Node *left;
-		Node *right;
-
-		explicit Node(int value) {
-			this->value = value;
-			left = nullptr;
-			right = nullptr;
-		}
-
-		Node *findClosestNode(int value) {
-			Node *current = this;
-			Node *next = this;
-			while (next != nullptr) {
-				current = next;
-				if (value == current->value) {
-					return current;
-				}
-				next = value > current->value ? current->left : current->right;
-			}
-			return current;
-		}
-
-		Node *smallestNode() {
-			return right == nullptr ? this : right->smallestNode();
-		}
-
-		void clear() {
-			if (left != nullptr) {
-				left->clear();
-				delete left;
-			}
-
-			if (right != nullptr) {
-				right->clear();
-				delete right;
-			}
-		};
-	};
-
-	Node *top;
 };
 
 int main()
 {
-	MySet mySet;
-	mySet.insert(10);
-	mySet.insert(15);
-	mySet.insert(16);
-	mySet.insert(14);
-	mySet.insert(5);
-	mySet.insert(4);
-	mySet.insert(2);
-	mySet.insert(7);
-	mySet.insert(6);
-	mySet.insert(2);
-	mySet.insert(1);
-	mySet.exists(2);
-	mySet.erase(5);
-	mySet.insert(5);
-	mySet.erase(15);
-	mySet.erase(10);
+	cin >> nodes_n;
+	checked = new bool [nodes_n];
+	for (int i = 0; i < nodes_n; ++i) {
+		checked[i] = false;
+	}
 
-	cout << "ok";
-
-	return 0;
+	cin >> edges_n;
+	EdgeList graph;
+	int a = 0;
+	int b = 0;
+	cout << "Enter edges" << endl;
+	for (int i = 0; i < edges_n; ++i) {
+		cin >> a >> b;
+		graph.add(a - 1, b - 1);
+	}
+	cout << "started" << endl;
+	cout << graph.hasAvailable();
+	graph.clear();
 }
