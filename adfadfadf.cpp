@@ -1,59 +1,61 @@
-// Example program
 #include <iostream>
 
 using namespace std;
 
-int nodes_n = 0;
-int edges_n = 0;
-bool* checked = NULL;
+int nodesNumber = 0;
+int edgesNumber = 0;
+bool* checked = nullptr;
 
 struct Edge {
 	int start = 0;
 	int end = 0;
-	Edge* next = NULL;
+	Edge *next = nullptr;
+
+	Edge(int start, int end, Edge *next) {
+		this->start = start;
+		this->end = end;
+		this->next = next;
+	}
 };
 
 struct EdgeList {
-	Edge* head = NULL;
+	Edge* head = nullptr;
 
 	void add(int a, int b) {
-		Edge* newElement = new Edge;
-		newElement->start = a;
-		newElement->end = b;
-		newElement->next = head;
+		Edge* newElement = new Edge(a, b, head);
 
 		head = newElement;
 	}
 
 	void clear() {
-		while (head != NULL) {
+		while (head != nullptr) {
 			Edge* tmp = head->next;
 			delete head;
 			head = tmp;
 		}
 	}
 
-	void isAvailable(int v, int &e_counter) {
+	void isAvailable(int v, int &entersCounter) {
 		checked[v] = true;
-		e_counter++;
-		cout << "E_counter " << e_counter << endl;
-		Edge* cur = head;
-		while (cur != NULL) {
-			if(cur->end == v && !checked[cur->start]) {
-				isAvailable(cur->start, e_counter);
+		entersCounter++;
+		Edge* current = head;
+		while (current != nullptr) {
+			if(current->end == v && !checked[current->start]) {
+				isAvailable(current->start, entersCounter);
 			}
-			cur = cur->next;
+			current = current->next;
 		}
 	}
 
 	bool hasAvailable() {
-		for (int i = 0; i < nodes_n; ++i) {
-			int e_counter = 0;
-			for (int i = 0; i < nodes_n; ++i) {
+		for (int i = 0; i < nodesNumber; ++i) {
+			int entersCounter = 0;
+			for (int i = 0; i < nodesNumber; ++i) {
 				checked[i] = false;
 			}
-			isAvailable(i, e_counter);
-			if (e_counter == nodes_n) {
+
+			isAvailable(i, entersCounter);
+			if (entersCounter == nodesNumber) {
 				return true;
 			}
 		}
@@ -63,22 +65,23 @@ struct EdgeList {
 
 int main()
 {
-	cin >> nodes_n;
-	checked = new bool [nodes_n];
-	for (int i = 0; i < nodes_n; ++i) {
+	cout << "Enter number of nodes:" << endl;
+	cin >> nodesNumber;
+	checked = new bool [nodesNumber];
+	for (int i = 0; i < nodesNumber; ++i) {
 		checked[i] = false;
 	}
 
-	cin >> edges_n;
+	cout << "Enter number of edges:" << endl;
+	cin >> edgesNumber;
 	EdgeList graph;
-	int a = 0;
-	int b = 0;
-	cout << "Enter edges" << endl;
-	for (int i = 0; i < edges_n; ++i) {
-		cin >> a >> b;
-		graph.add(a - 1, b - 1);
+	int startV = 0;
+	int endV = 0;
+	cout << "Enter edges [start end]" << endl;
+	for (int i = 0; i < edgesNumber; ++i) {
+		cin >> startV >> endV;
+		graph.add(startV - 1, endV - 1);
 	}
-	cout << "started" << endl;
 	cout << graph.hasAvailable();
 	graph.clear();
 }
